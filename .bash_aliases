@@ -1,1 +1,1 @@
-alias reinstall='sudo gala-node stop && sudo gala-node remove && sudo rm -rf DownloadLinuxNode && sudo wget --trust-server-names https://links.gala.com/DownloadLinuxNode && sudo tar xzvf DownloadLinuxNode && yes|sudo ./gala-node/install.sh && sudo gala-node start'
+alias reinstall='sudo gala-node stop && sudo gala-node remove && sudo rm -rf DownloadLinuxNode && sudo wget -O gala.tar.gz --trust-server-names https://links.gala.com/DownloadLinuxNode && sudo tar xzvf DownloadLinuxNode && yes|sudo ./gala-node/install.sh && sudo gala-node start'
