@@ -1,1 +1,1 @@
-0 9 * * * reboot –f
+0 0 * * * reboot –f
