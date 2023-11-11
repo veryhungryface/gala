@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITPO의 노드 매니저</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f1f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 2rem 0;
+        }
+        button {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0.5rem;
+        }
+        pre {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            margin: 2rem 0;
+            white-space: pre-wrap; /* 줄바꿈 처리를 위한 스타일 추가 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SITPO의 노드 매니저</h1>
+        <button id="detect_notrun" class="btn btn-primary">비정상 노드 검사</button>
+        <button id="version_check" class="btn btn-primary">노드 상태 조회</button>
+        <button id="reboot" class="btn btn-primary">노드 전체 재부팅</button>
+        <button id="clear_output" class="btn btn-secondary">출력 결과 지우기</button>
+        <div class="d-flex align-items-center"> <!-- 여기에 align-items-center 클래스를 추가합니다. -->
+            <input type="text" id="command_input1" class="form-control mr-2" placeholder="특정 서버이름 앞부분을 입력하세요">
+            <input type="text" id="command_input2" class="form-control mr-2" placeholder="명령어를 입력하세요">
+            <button id="execute_command" class="btn btn-primary" style="min-width: 150px;">명령어 일괄 실행</button>
+        </div>
+        <pre id="output"></pre>
+    </div>
+    <script>
+        // runScript 함수에 command 인자 추가
+        function runScript(script, command, servername_start) {
+            $('#output').text('실행 중..');
+            $.ajax({
+                url: '/run_script',
+                type: 'POST',
+                data: {'script': script, 'command': command, 'servername_start': servername_start},
+                success: function (data) {
+                    $('#output').text(data.output);
+                }
+            });
+        }
+        $('#command_input2').keypress(function (e) {
+        if (e.which == 13) {
+            e.preventDefault();
+            var servername_start = $('#command_input1').val();
+            var command = $('#command_input2').val();
+            runScript('command_auto_multi', command, servername_start);
+        }
+        });
+
+        $('#detect_notrun').click(function () {
+            runScript('detect_notrun');
+        });
+    
+        $('#version_check').click(function () {
+            var servername_start = $('#command_input1').val();
+            var command = $('#command_input2').val();
+            runScript('status_multi', command, servername_start);
+        });
+
+        $('#reboot').click(function () {
+            runScript('instance_all_reboot');
+        });
+    
+        $('#execute_command').click(function () {
+            var servername_start = $('#command_input1').val();
+            var command = $('#command_input2').val();
+            runScript('command_auto_multi', command, servername_start);
+        });
+    
+        $('#clear_output').click(function () {
+            $('#output').text('');
+        });
+    </script>
+</body>
+</html>
