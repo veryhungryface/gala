@@ -1,6 +1,14 @@
 import paramiko
+import os
 import json
 from multiprocessing import Pool, Manager
+from discord_webhook import DiscordWebhook
+
+#head = os.environ.get('COMMAND_INPUT1', '')  # 환경 변수에서 명령어를 가져옵니다.
+#comm = os.environ.get('COMMAND_INPUT2', '')
+
+head = ''
+comm = 'sudo gala-node status'
 
 def process_server(args, result_queue, comm):
     server, ssh_username = args
@@ -36,6 +44,13 @@ def process_server(args, result_queue, comm):
         print(f"An error occurred on server {server['label']}: {str(e)}")
         return server['label']
 
+def send_discord_notification(failed_servers):
+    if failed_servers:
+        webhook_url = 'https://discord.com/api/webhooks/960069009540259860/2UkmDlsEg-ymQ2L0X2GbifywiJwyWOWPJWf409ojtBMUi6VJ6RhptTCuFaIK5gsqVF94'
+        message = f"이상 노드 발견!\n\n {', '.join(failed_servers)}"
+        webhook = DiscordWebhook(url=webhook_url, content=message)
+        webhook.execute()
+
 if __name__ == "__main__":
     # SSH 접속 정보 설정
     ssh_username = "root"  # 항상 root로 설정
@@ -47,9 +62,6 @@ if __name__ == "__main__":
     # 문제가 있는 서버를 저장할 리스트
     failed_servers = []
 
-    # head 변수 설정
-    head = 'FRR'
-    comm = 'gala-node status'
     # 병렬 작업을 위한 Pool과 Manager 생성
     with Pool() as pool, Manager() as manager:
         # 공유 큐 생성
@@ -66,18 +78,6 @@ if __name__ == "__main__":
     # 결과를 label 오름차순으로 정렬
     results.sort(key=lambda x: x['label'])
 
-    # 결과 출력
-    for result in results:
-        print(f"Server Label: {result['label']}")
-        print("Result:")
-        print(result['result'])
-        print("="*20 + "\n")
-
-    # 문제가 있는 서버 출력
-    for result in results:
-        if 'error' in result:
-            failed_servers.append(result['error'])
-    
     failed_cnt = len(failed_servers)
     server_cnt = len(args_list)
     success_cnt = server_cnt - failed_cnt
@@ -86,5 +86,16 @@ if __name__ == "__main__":
         print(f"({success_cnt}) servers were successfully processed.\nBut failed to connect to the following ({failed_cnt}) servers:")
         for failed_server in failed_servers:
             print(f" - {failed_server}")
+        print("="*30 + "\n")
+        
+        send_discord_notification(failed_servers)
+
     else:
         print(f"[Head name : {head}] \nAll ({success_cnt}) servers were successfully processed.")
+        print("="*30 + "\n")
+
+    # 결과 출력
+    for result in results:
+        print(f"<{result['label']}>")
+        print(result['result'])
+        print("="*30 + "\n")
