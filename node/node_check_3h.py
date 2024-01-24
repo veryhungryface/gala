@@ -4,10 +4,13 @@ import json
 from multiprocessing import Pool, Manager
 from discord_webhook import DiscordWebhook
 
+# head = os.environ.get('COMMAND_INPUT1', '')  # 환경 변수에서 명령어를 가져옵니다.
+# comm = os.environ.get('COMMAND_INPUT2', '')
+
 head = ''
 comm = 'sudo gala-node status'
 
-def process_server(args, result_queue, comm):
+def process_server(args, result_queue, comm, shared_failed_servers):
     server, ssh_username = args
     try:
         # SSH 세션 생성
@@ -33,13 +36,15 @@ def process_server(args, result_queue, comm):
 
     except paramiko.AuthenticationException:
         print(f"Failed to authenticate on server {server['label']}")
-        return server['label']
+        shared_failed_servers.append(server['label'])
+
     except paramiko.SSHException:
         print(f"Unable to establish SSH connection to server {server['label']}")
-        return server['label']
+        shared_failed_servers.append(server['label'])
+
     except Exception as e:
         print(f"An error occurred on server {server['label']}: {str(e)}")
-        return server['label']
+        shared_failed_servers.append(server['label'])
 
 def send_discord_notification(failed_servers):
     if failed_servers:
@@ -47,9 +52,11 @@ def send_discord_notification(failed_servers):
         message = f"이상 노드 발견!\n\n {', '.join(failed_servers)}"
         webhook = DiscordWebhook(url=webhook_url, content=message)
         webhook.execute()
+        print('discord webhook sended')
+
 
 if __name__ == "__main__":
-    # SSH 접속 정보 설정
+     # SSH 접속 정보 설정
     ssh_username = "root"  # 항상 root로 설정
 
     # 파일에서 JSON 데이터 읽기
@@ -58,23 +65,26 @@ if __name__ == "__main__":
 
     # 문제가 있는 서버를 저장할 리스트
     failed_servers = []
-
-    # 병렬 작업을 위한 Pool과 Manager 생성
-    with Pool() as pool, Manager() as manager:
-        # 공유 큐 생성
+    # 문제가 있는 서버를 저장할 리스트 (Manager의 리스트 proxy 사용)
+    with Manager() as manager:
+        shared_failed_servers = manager.list()
         result_queue = manager.Queue()
-        # 각 서버에 대해 병렬로 작업 수행
-        args_list = [(server, ssh_username) for server in data if server['label'].startswith(head)]
-        pool.starmap(process_server, [(arg, result_queue, comm) for arg in args_list])
 
-        # 수행 결과 가져오기
+        # 병렬 작업을 위한 Pool과 Manager 생성
+        with Pool() as pool:
+            # 각 서버에 대해 병렬로 작업 수행
+            args_list = [(server, ssh_username) for server in data if server['label'].startswith(head)]
+            pool.starmap(process_server, [(arg, result_queue, comm, shared_failed_servers) for arg in args_list])
+
+        # 결과를 label 오름차순으로 정렬
         results = []
         while not result_queue.empty():
             results.append(result_queue.get())
 
-    # 결과를 label 오름차순으로 정렬
-    results.sort(key=lambda x: x['label'])
+        failed_servers = list(shared_failed_servers)
+        failed_cnt = len(failed_servers)
+        server_cnt = len(args_list)
+        success_cnt = server_cnt - failed_cnt
 
-    if failed_servers:
-        send_discord_notification(failed_servers)
-
+        if failed_servers:
+            send_discord_notification(failed_servers)
