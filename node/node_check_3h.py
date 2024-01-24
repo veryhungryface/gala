@@ -59,10 +59,13 @@ if __name__ == "__main__":
      # SSH 접속 정보 설정
     ssh_username = "root"  # 항상 root로 설정
 
-    # 파일에서 JSON 데이터 읽기
-    with open('servers.json', 'r') as json_file:
-        data = json.load(json_file)
+    # Specify the absolute path to the 'servers.json' file
+    json_file_path = '/root/my_project/server/servers.json'
 
+    # Open the JSON file
+    with open(json_file_path, 'r') as json_file:
+        data = json.load(json_file)
+        
     # 문제가 있는 서버를 저장할 리스트
     failed_servers = []
     # 문제가 있는 서버를 저장할 리스트 (Manager의 리스트 proxy 사용)
