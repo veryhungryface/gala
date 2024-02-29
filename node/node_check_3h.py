@@ -1,5 +1,5 @@
 import paramiko
-import os
+import os, time
 import json
 from multiprocessing import Pool, Manager
 from discord_webhook import DiscordWebhook
@@ -35,37 +35,48 @@ def process_server(args, result_queue, comm, shared_failed_servers):
         return None
 
     except paramiko.AuthenticationException:
-        print(f"Failed to authenticate on server {server['label']}")
-        shared_failed_servers.append(server['label'])
+        print(f"Failed to authenticate on server {server}: Incorrect username or password")
+        shared_failed_servers.append(server)
 
     except paramiko.SSHException:
-        print(f"Unable to establish SSH connection to server {server['label']}")
-        shared_failed_servers.append(server['label'])
+        print(f"Unable to establish SSH connection to server {server}: SSH connection failed")
+        shared_failed_servers.append(server)
 
     except Exception as e:
-        print(f"An error occurred on server {server['label']}: {str(e)}")
-        shared_failed_servers.append(server['label'])
+        print(f"An error occurred on server {server}: {str(e)}")
+        shared_failed_servers.append(server)
 
 def send_discord_notification(failed_servers):
     if failed_servers:
         webhook_url = 'https://discord.com/api/webhooks/960069009540259860/2UkmDlsEg-ymQ2L0X2GbifywiJwyWOWPJWf409ojtBMUi6VJ6RhptTCuFaIK5gsqVF94'
-        message = f"이상 노드 발견!\n\n {', '.join(failed_servers)}"
+        message = "이상 노드 발견!\n"
+        for server in failed_servers:
+            message += f"{server['label']} ({server['ip']})\n"
         webhook = DiscordWebhook(url=webhook_url, content=message)
         webhook.execute()
         print('discord webhook sended')
 
 
+def process_failed_servers(failed_servers, shared_failed_servers):
+    time.sleep(600)  # 10분 대기
+    if failed_servers:
+        shared_failed_servers.extend(failed_servers)
+        send_discord_notification(failed_servers)
+        # 추가 검사 수행
+        for server in failed_servers:
+            process_server((server, ssh_username), result_queue, comm, shared_failed_servers)
+
 if __name__ == "__main__":
-     # SSH 접속 정보 설정
+    # SSH 접속 정보 설정
     ssh_username = "root"  # 항상 root로 설정
 
     # Specify the absolute path to the 'servers.json' file
     json_file_path = '/root/my_project/server/servers.json'
-
+    #json_file_path = './servers.json'
     # Open the JSON file
     with open(json_file_path, 'r') as json_file:
         data = json.load(json_file)
-        
+
     # 문제가 있는 서버를 저장할 리스트
     failed_servers = []
     # 문제가 있는 서버를 저장할 리스트 (Manager의 리스트 proxy 사용)
@@ -90,4 +101,7 @@ if __name__ == "__main__":
         success_cnt = server_cnt - failed_cnt
 
         if failed_servers:
-            send_discord_notification(failed_servers)
+            #send_discord_notification(failed_servers)
+            process_failed_servers(failed_servers, shared_failed_servers)
+        else:
+            print("No issues found. Exiting program.")
