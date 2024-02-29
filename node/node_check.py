@@ -3,11 +3,11 @@ import os
 import json
 from multiprocessing import Pool, Manager
 
-# head = os.environ.get('COMMAND_INPUT1', '')  # 환경 변수에서 명령어를 가져옵니다.
-# comm = os.environ.get('COMMAND_INPUT2', '')
+head = os.environ.get('COMMAND_INPUT1', '')  # 환경 변수에서 명령어를 가져옵니다.
+comm = os.environ.get('COMMAND_INPUT2', '')
 
-head = 'FRR_2'
-comm = 'sudo gala-node status'
+#head = 'FRR_2'
+#comm = 'sudo gala-node status'
 
 def process_server(args, result_queue, comm, shared_failed_servers):
     server, ssh_username = args
@@ -46,6 +46,7 @@ def process_server(args, result_queue, comm, shared_failed_servers):
         shared_failed_servers.append(server['label'])
 
 
+
 if __name__ == "__main__":
      # SSH 접속 정보 설정
     ssh_username = "root"  # 항상 root로 설정
@@ -73,16 +74,19 @@ if __name__ == "__main__":
             results.append(result_queue.get())
 
         failed_servers = list(shared_failed_servers)
+
+         # 결과에서 ": success"가 포함된 개수 확인
+        success_cnt = sum(": success" in result['result'] for result in results)
+
+        # 실패한 서버 수
         failed_cnt = len(failed_servers)
         server_cnt = len(args_list)
-        success_cnt = server_cnt - failed_cnt
 
         if failed_servers:
             print(f"({success_cnt}) servers were successfully processed.\nBut failed to connect to the following ({failed_cnt}) servers:")
             for failed_server in failed_servers:
                 print(f" - {failed_server}")
             print("="*30 + "\n")
-            
 
         else:
             print(f"[Head name : {head}] \nAll ({success_cnt}) servers were successfully processed.")
