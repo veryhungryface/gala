@@ -4,11 +4,11 @@ import json
 from multiprocessing import Pool, Manager
 from discord_webhook import DiscordWebhook
 
-# head = os.environ.get('COMMAND_INPUT1', '')  # 환경 변수에서 명령어를 가져옵니다.
-# comm = os.environ.get('COMMAND_INPUT2', '')
+head = os.environ.get('COMMAND_INPUT1', '')  # 환경 변수에서 명령어를 가져옵니다.
+comm = os.environ.get('COMMAND_INPUT2', '')
 
-head = ''
-comm = 'sudo gala-node status'
+#head = ''
+#comm = 'sudo gala-node status'
 
 def process_server(args, result_queue, comm, shared_failed_servers):
     server, ssh_username = args
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     ssh_username = "root"  # 항상 root로 설정
 
     # Specify the absolute path to the 'servers.json' file
-    json_file_path = '/root/my_project/server/servers.json'
+    json_file_path = '/sitpo/nodemanager/servers.json'
     #json_file_path = './servers.json'
     # Open the JSON file
     with open(json_file_path, 'r') as json_file:
