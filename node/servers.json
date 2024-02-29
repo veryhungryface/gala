@@ -448,5 +448,95 @@
     "label": "HOY_1_2",
     "ip": "104.168.64.216",
     "password": "E4i5A30yS4eZUjdZb7"
+  },
+  {
+    "label": "CT_1",
+    "ip": "74.48.48.174",
+    "password": "12Zu7OCrVW46duCa6e"
+  },
+  {
+    "label": "CT_2",
+    "ip": "74.48.186.212",
+    "password": "2hmT5s6rXR34KCexB4"
+  },
+  {
+    "label": "CT_3",
+    "ip": "23.94.84.10",
+    "password": "6cUUs83Rldp72SV9qJ"
+  },
+  {
+    "label": "CT_4",
+    "ip": "198.144.180.157",
+    "password": "6xoeMb5Xz15I2fN0XI"
+  },
+  {
+    "label": "CT_5",
+    "ip": "192.227.252.107",
+    "password": "zE4v8cS543Ek8dgZRQ"
+  },
+  {
+    "label": "CT_6",
+    "ip": "192.3.16.6",
+    "password": "3TS6a9SNCo9Mv1qe6m"
+  },
+  {
+    "label": "CT_7",
+    "ip": "107.173.125.194",
+    "password": "7u8ZrH040x8IAMNupn"
+  },
+  {
+    "label": "GMAN",
+    "ip": "172.245.185.91",
+    "password": "wKim0t511HVz5FfN3Q"
+  },
+  {
+    "label": "ZERO_1",
+    "ip": "23.94.139.231",
+    "password": "Vo56Gmt0dE82G3HmxA"
+  },
+  {
+    "label": "ZERO_2",
+    "ip": "192.3.60.215",
+    "password": "093F6ruFpBRq6fl2YK"
+  },
+  {
+    "label": "ZERO_3",
+    "ip": "142.171.132.210",
+    "password": "N6n6by91OgYQo3k2CO"
+  },
+  {
+    "label": "ZERO_4",
+    "ip": "107.172.77.115",
+    "password": "oE03u7LdkCM373JAto"
+  },
+  {
+    "label": "ZERO_5",
+    "ip": "104.168.125.222",
+    "password": "p9CbXSvo1t8LQfW026"
+  },
+  {
+    "label": "ZERO_6",
+    "ip": "192.3.12.108",
+    "password": "5C6uK4J76MfJy0Aguj"
+  },
+  {
+    "label": "ZERO_7",
+    "ip": "198.46.248.40",
+    "password": "Vlo2cTVXjbI17F93m2"
+  },
+  {
+    "label": "ZERO_8",
+    "ip": "104.168.102.176",
+    "password": "YGUH4vxz0R7i20ch6K"
+  },
+  {
+    "label": "FREE_1",
+    "ip": "172.245.70.195",
+    "password": "5g2Gte0jh6RZtQ8U9T"
+  },
+  {
+    "label": "FREE_2",
+    "ip": "104.168.9.137",
+    "password": "ubd3Y90w8LV06lNqQX"
   }
 ]
